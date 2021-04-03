@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MEC;
+using Qurre;
 using Qurre.API;
 using Qurre.API.Events;
 using UnityEngine;
@@ -12,11 +13,11 @@ namespace Server_Stats
 {
     public class EventHandler
     {
-        public static List<API.PlayerData> LeavePro = new List<API.PlayerData>();
+        public static Dictionary<string,API.PlayerData> LeavePro = new Dictionary<string,API.PlayerData>();
         public static List<Vector3> Pos = new List<Vector3>();
         public PluginClass pluginClass;
         public static List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
-        public EventHandler(PluginClass pluginClass) => pluginClass = this.pluginClass;
+        public EventHandler(PluginClass pluginClass) => this.pluginClass = pluginClass;
         public IEnumerator<float> CheckPos()
         {
             yield return Timing.WaitForSeconds(0.5f);
@@ -35,17 +36,35 @@ namespace Server_Stats
                     }
                 }
             }
+            if (Configs.Debug)
+            {
+                Log.Debug($"returnHP: {Configs.returnHP}\nreturnHPTime: {Configs.returnHPTime}\nreturnHPValue: {Configs.returnHPvalue}");
+            }
         }
         public void RoundStart()
         {
-            Coroutines.Add(Timing.RunCoroutine(CheckPos()));
+            if (Configs.returnHP) Coroutines.Add(Timing.RunCoroutine(CheckPos()));
+            if (Configs.Debug)
+            {
+                Log.Debug("Round starting");
+            }
         }
         public void RoundRestart()
         {
-            Coroutines.Count();
+            Coroutines.Clear();
+            if (Configs.Debug)
+            {
+                Log.Debug("Round Restating...");
+            }
         }
         public void Spawn(SpawnEvent ev)
         {
+            if (Configs.Debug)
+            {
+                Log.Debug($"Spawn Debug");
+                Log.Debug($"Spawning Player: {ev.Player.Nickname}");
+                Log.Debug($"Spawning Role: {ev.Player.RoleName}");
+            }
             if (ev.Player.Role == RoleType.ChaosInsurgency)
             {
                 ev.Player.HP = Configs.CIHP;
@@ -167,16 +186,30 @@ namespace Server_Stats
         }
         public void Leave(LeaveEvent ev)
         {
-            if (Configs.LeaveProtect)
+            if (Configs.Debug)
             {
-                LeavePro.Add(new API.PlayerData(ev.Player.UserId));
+                Log.Debug($"Leave Debug");
+                Log.Debug($"Leaving Player: {ev.Player.Nickname}");
+            }
+                if (Configs.LeaveProtect)
+            {
+                LeavePro.Add(ev.Player.UserId,new API.PlayerData(ev.Player.UserId));
             }
         }
         public void Join(JoinEvent ev)
         {
-            if (Configs.LeaveProtect)
+            if (Configs.Debug)
             {
-                //LeavePro need fix
+                Log.Debug($"Join Player: {ev.Player.Nickname}\nJoin Player IP: {ev.Player.IP}\nJoin Player UserId: {ev.Player.UserId}");
+            }
+                if (Configs.LeaveProtect)
+            {
+                if (LeavePro.ContainsKey(ev.Player.UserId))
+                {
+                    ev.Player.Role = API.PlayerData.PlayerRole;
+                    ev.Player.Position = API.PlayerData.PlayerPos;
+                    ev.Player.AddItem((ItemType)API.PlayerData.items);
+                }
             }
             ev.Player.Broadcast(Configs.JoinMsgTime ,Configs.JoinMsg);
         }

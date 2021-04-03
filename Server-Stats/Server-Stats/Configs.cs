@@ -69,6 +69,10 @@ namespace Server_Stats
             RSCItem = Plugin.Config.GetIntList("RSCItem");
             TUTItem = Plugin.Config.GetIntList("TUTItem");
             Debug = Plugin.Config.GetBool("Debug", false);
+            returnHP = Plugin.Config.GetBool("returnHP", false);
+            returnHPTime = Plugin.Config.GetInt("returnHPTime", 2);
+            returnHPvalue = Plugin.Config.GetInt("returnHPValue", 20);
+
         }
     }
 }

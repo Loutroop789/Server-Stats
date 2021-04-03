@@ -11,15 +11,15 @@ namespace Server_Stats.API
     public class PlayerData
     {
         public string UserID;
-        public Vector3 PlayerPos;
-        public RoleType PlayerRole;
-        public Inventory.SyncListItemInfo items;
+        public static Vector3 PlayerPos;
+        public static RoleType PlayerRole;
+        public static int items;
         public PlayerData(string UserID)
         {
             this.UserID = UserID;
             PlayerPos = Player.Get(UserID).Position;
             PlayerRole = Player.Get(UserID).Role;
-            items = Player.Get(UserID).Inventory.items;
+            items = Player.Get(UserID).Inventory.itemUniq;
         }
     }
 }
