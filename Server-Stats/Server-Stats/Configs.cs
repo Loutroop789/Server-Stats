@@ -9,6 +9,7 @@ namespace Server_Stats
 {
     public class Configs
     {
+        public static bool IsEnabled;
         public static string JoinMsg;
         public static ushort JoinMsgTime;
         public static int NTFCadetHP;
@@ -41,8 +42,15 @@ namespace Server_Stats
         public static float returnHPTime;
         public static int returnHPvalue;
         public static bool Debug;
+        public static bool AutoNuck;
+        public static int AutoNuckTime;
+        public static int DEscapeRole;
+        public static int REscapeRole;
+        public static bool FriendlyFireRoundEnd;
+        public static string EffectRoundEnd;
         public static void Reload()
         {
+            IsEnabled = Plugin.Config.GetBool("IsEnabled");
             JoinMsg = Plugin.Config.GetString("JoinMsg", "");
             JoinMsgTime = Plugin.Config.GetUShort("JoinMsgTime", 5);
             NTFCadetHP = Plugin.Config.GetInt("NTFCadetHP", 100);
@@ -72,7 +80,12 @@ namespace Server_Stats
             returnHP = Plugin.Config.GetBool("returnHP", false);
             returnHPTime = Plugin.Config.GetInt("returnHPTime", 2);
             returnHPvalue = Plugin.Config.GetInt("returnHPValue", 20);
-
+            AutoNuck = Plugin.Config.GetBool("AutoNuck");
+            AutoNuckTime = Plugin.Config.GetInt("AutoNuckTime", 600);
+            DEscapeRole = Plugin.Config.GetInt("ClassD-Escape-Role", 8);
+            REscapeRole = Plugin.Config.GetInt("Scientist-Escape-Role", 13);
+            FriendlyFireRoundEnd = Plugin.Config.GetBool("FriendlyFireRoundEnd");
+            EffectRoundEnd = Plugin.Config.GetString("Effect-Round-End");
         }
     }
 }

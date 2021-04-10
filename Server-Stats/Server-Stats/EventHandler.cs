@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CustomPlayerEffects;
 using MEC;
 using Qurre;
 using Qurre.API;
@@ -41,12 +42,28 @@ namespace Server_Stats
                 Log.Debug($"returnHP: {Configs.returnHP}\nreturnHPTime: {Configs.returnHPTime}\nreturnHPValue: {Configs.returnHPvalue}");
             }
         }
+        public void Escape(EscapeEvent ev)
+        {
+            if (ev.Player.Role == RoleType.ClassD)
+            {
+                ev.NewRole = (RoleType)Configs.DEscapeRole; 
+            }
+            if (ev.Player.Role == RoleType.Scientist)
+            {
+                ev.NewRole = (RoleType)Configs.REscapeRole;
+            }
+        }
         public void RoundStart()
         {
             if (Configs.returnHP) Coroutines.Add(Timing.RunCoroutine(CheckPos()));
+            if (Configs.AutoNuck) Coroutines.Add(Timing.RunCoroutine(AutoNuck()));
             if (Configs.Debug)
             {
                 Log.Debug("Round starting");
+            }
+            foreach (Player player in Player.List)
+            {
+                player.FriendlyFire = false;
             }
         }
         public void RoundRestart()
@@ -55,6 +72,18 @@ namespace Server_Stats
             if (Configs.Debug)
             {
                 Log.Debug("Round Restating...");
+            }
+        }
+        public void End(RoundEndEvent ev)
+        {
+            foreach (Player player in Player.List)
+            {
+                if (Configs.FriendlyFireRoundEnd)
+                {
+                    player.FriendlyFire = true;
+                    player.TeleportToRandomRoom();
+                    if (Configs.EffectRoundEnd.Length > 0) player.EnableEffect(Configs.EffectRoundEnd, 30);
+                }
             }
         }
         public void Spawn(SpawnEvent ev)
@@ -212,6 +241,14 @@ namespace Server_Stats
                 }
             }
             ev.Player.Broadcast(Configs.JoinMsgTime ,Configs.JoinMsg);
+        }
+        public IEnumerator<float> AutoNuck()
+        {
+            yield return Timing.WaitForSeconds(0.5f);
+            if (RoundSummary.roundTime == Configs.AutoNuckTime)
+            {
+                AlphaWarheadController.Host.StartDetonation();
+            }
         }
     }
 }
